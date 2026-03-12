@@ -260,7 +260,8 @@ fn draw_data_view(f: &mut Frame, app: &mut App, area: Rect, t: &Theme) {
 
     {
         let data = app.table_data.as_ref().unwrap();
-        let visible_cols = compute_visible_columns(data, inner.width as usize, app.data_scroll_col, app);
+        let visible_cols =
+            compute_visible_columns(data, inner.width as usize, app.data_scroll_col, app);
         if !visible_cols.is_empty() {
             let last_visible = visible_cols.last().unwrap().0;
             let first_visible = visible_cols.first().unwrap().0;
@@ -273,7 +274,8 @@ fn draw_data_view(f: &mut Frame, app: &mut App, area: Rect, t: &Theme) {
     }
 
     let data = app.table_data.as_ref().unwrap();
-    let visible_cols = compute_visible_columns(data, inner.width as usize, app.data_scroll_col, app);
+    let visible_cols =
+        compute_visible_columns(data, inner.width as usize, app.data_scroll_col, app);
     let col_range = &visible_cols;
 
     let search_lower = if !app.search_query.is_empty() {
@@ -301,7 +303,11 @@ fn draw_data_view(f: &mut Frame, app: &mut App, area: Rect, t: &Theme) {
             let display = format!(
                 "{}{}{}",
                 pin_marker,
-                truncate_str(name, w.saturating_sub(sort_indicator.len()).saturating_sub(pin_marker.len())),
+                truncate_str(
+                    name,
+                    w.saturating_sub(sort_indicator.len())
+                        .saturating_sub(pin_marker.len())
+                ),
                 sort_indicator
             );
             let mut style = Style::default().fg(t.accent).add_modifier(Modifier::BOLD);
@@ -332,7 +338,8 @@ fn draw_data_view(f: &mut Frame, app: &mut App, area: Rect, t: &Theme) {
                     let raw = row.get(ci).map(|s| s.as_str()).unwrap_or("");
 
                     if editing && is_selected && ci == app.selected_col && focused {
-                        let display = format!("{}▎", truncate_str(&app.edit_buffer, w.saturating_sub(1)));
+                        let display =
+                            format!("{}▎", truncate_str(&app.edit_buffer, w.saturating_sub(1)));
                         return Cell::from(display).style(
                             Style::default()
                                 .fg(t.crust)
@@ -400,9 +407,7 @@ fn draw_data_view(f: &mut Frame, app: &mut App, area: Rect, t: &Theme) {
 
 fn build_data_title(app: &App) -> String {
     let base = match app.data_source {
-        DataSource::Table if !app.tables.is_empty() => {
-            app.tables[app.selected_table].clone()
-        }
+        DataSource::Table if !app.tables.is_empty() => app.tables[app.selected_table].clone(),
         DataSource::Query => "Query Results".to_string(),
         _ => "Data".to_string(),
     };
@@ -464,7 +469,9 @@ fn compute_visible_columns(
         used += w;
     }
 
-    let start = scroll_col.max(app.pinned_columns).min(col_widths.len().saturating_sub(1));
+    let start = scroll_col
+        .max(app.pinned_columns)
+        .min(col_widths.len().saturating_sub(1));
 
     for (i, &w) in col_widths.iter().enumerate().skip(start) {
         if i < app.pinned_columns {
@@ -484,7 +491,14 @@ fn compute_visible_columns(
     visible
 }
 
-fn draw_scrollbar(f: &mut Frame, area: Rect, offset: usize, total: usize, visible: usize, t: &Theme) {
+fn draw_scrollbar(
+    f: &mut Frame,
+    area: Rect,
+    offset: usize,
+    total: usize,
+    visible: usize,
+    t: &Theme,
+) {
     if total == 0 || area.height < 3 {
         return;
     }
@@ -576,9 +590,7 @@ fn draw_query_editor_with_title(
 
     let lines = highlight_sql(&app.query_input, app.query_error_token.as_deref(), t);
 
-    let paragraph = Paragraph::new(lines)
-        .block(block)
-        .style(Style::default());
+    let paragraph = Paragraph::new(lines).block(block).style(Style::default());
     f.render_widget(paragraph, area);
 
     if focused {
@@ -606,11 +618,11 @@ fn cursor_position_multiline(input: &str, byte_cursor: usize) -> (u16, u16) {
 fn highlight_sql<'a>(input: &'a str, error_token: Option<&str>, t: &Theme) -> Vec<Line<'a>> {
     let keywords: &[&str] = &[
         "SELECT", "FROM", "WHERE", "INSERT", "UPDATE", "DELETE", "CREATE", "DROP", "ALTER",
-        "TABLE", "INDEX", "INTO", "VALUES", "SET", "AND", "OR", "NOT", "NULL", "IS", "IN",
-        "LIKE", "BETWEEN", "JOIN", "INNER", "LEFT", "RIGHT", "OUTER", "FULL", "CROSS", "ON",
-        "AS", "ORDER", "BY", "GROUP", "HAVING", "LIMIT", "OFFSET", "UNION", "DISTINCT", "COUNT",
-        "SUM", "MAX", "MIN", "ASC", "DESC", "CASE", "WHEN", "THEN", "ELSE", "END", "EXISTS",
-        "CAST", "WITH", "IF", "PRIMARY", "EXPLAIN", "TRUE", "FALSE", "USING", "AVG", "COALESCE",
+        "TABLE", "INDEX", "INTO", "VALUES", "SET", "AND", "OR", "NOT", "NULL", "IS", "IN", "LIKE",
+        "BETWEEN", "JOIN", "INNER", "LEFT", "RIGHT", "OUTER", "FULL", "CROSS", "ON", "AS", "ORDER",
+        "BY", "GROUP", "HAVING", "LIMIT", "OFFSET", "UNION", "DISTINCT", "COUNT", "SUM", "MAX",
+        "MIN", "ASC", "DESC", "CASE", "WHEN", "THEN", "ELSE", "END", "EXISTS", "CAST", "WITH",
+        "IF", "PRIMARY", "EXPLAIN", "TRUE", "FALSE", "USING", "AVG", "COALESCE",
     ];
 
     input
@@ -640,10 +652,15 @@ fn highlight_sql<'a>(input: &'a str, error_token: Option<&str>, t: &Theme) -> Ve
                     continue;
                 }
 
-                if ch == '-' && pos + 1 < line_str.len() && line_str.as_bytes().get(pos + 1) == Some(&b'-') {
+                if ch == '-'
+                    && pos + 1 < line_str.len()
+                    && line_str.as_bytes().get(pos + 1) == Some(&b'-')
+                {
                     spans.push(Span::styled(
                         &line_str[pos..],
-                        Style::default().fg(t.overlay0).add_modifier(Modifier::ITALIC),
+                        Style::default()
+                            .fg(t.overlay0)
+                            .add_modifier(Modifier::ITALIC),
                     ));
                     pos = line_str.len();
                     continue;
@@ -736,28 +753,69 @@ fn highlight_sql<'a>(input: &'a str, error_token: Option<&str>, t: &Theme) -> Ve
 fn draw_status_bar(f: &mut Frame, app: &App, area: Rect, t: &Theme) {
     match app.input_mode {
         InputMode::Search => {
-            draw_input_bar(f, " / ", &app.search_query, "Enter to search, Esc to cancel", t, area);
+            draw_input_bar(
+                f,
+                " / ",
+                &app.search_query,
+                "Enter to search, Esc to cancel",
+                t,
+                area,
+            );
             return;
         }
         InputMode::Filter => {
-            draw_input_bar(f, " F ", &app.filter_query, "Enter WHERE clause, Esc to cancel", t, area);
+            draw_input_bar(
+                f,
+                " F ",
+                &app.filter_query,
+                "Enter WHERE clause, Esc to cancel",
+                t,
+                area,
+            );
             return;
         }
         InputMode::Export => {
-            draw_input_bar(f, " E ", &app.export_input, "Enter to export, Esc to cancel", t, area);
+            draw_input_bar(
+                f,
+                " E ",
+                &app.export_input,
+                "Enter to export, Esc to cancel",
+                t,
+                area,
+            );
             return;
         }
         InputMode::SaveQueryName => {
-            draw_input_bar(f, " S ", &app.save_query_name_input, "Enter name, Esc to cancel", t, area);
+            draw_input_bar(
+                f,
+                " S ",
+                &app.save_query_name_input,
+                "Enter name, Esc to cancel",
+                t,
+                area,
+            );
             return;
         }
         InputMode::EditCell => {
-            draw_input_bar(f, " EDIT ", &app.edit_buffer, "Enter to save, Esc to cancel", t, area);
+            draw_input_bar(
+                f,
+                " EDIT ",
+                &app.edit_buffer,
+                "Enter to save, Esc to cancel",
+                t,
+                area,
+            );
             return;
         }
         InputMode::DeleteConfirm => {
             let line = Line::from(vec![
-                Span::styled(" DEL ", Style::default().fg(t.crust).bg(t.red).add_modifier(Modifier::BOLD)),
+                Span::styled(
+                    " DEL ",
+                    Style::default()
+                        .fg(t.crust)
+                        .bg(t.red)
+                        .add_modifier(Modifier::BOLD),
+                ),
                 Span::styled(" Delete this row? (y/n) ", Style::default().fg(t.text)),
             ]);
             let p = Paragraph::new(line).style(Style::default().bg(t.crust));
@@ -907,51 +965,174 @@ fn draw_help_popup(f: &mut Frame, app: &App, area: Rect, t: &Theme) {
     let ks = Style::default().fg(t.lavender);
     let ds = Style::default().fg(t.text);
     let help_text = vec![
-        Line::from(Span::styled("Keyboard Shortcuts", Style::default().fg(t.accent).add_modifier(Modifier::BOLD))),
+        Line::from(Span::styled(
+            "Keyboard Shortcuts",
+            Style::default().fg(t.accent).add_modifier(Modifier::BOLD),
+        )),
         Line::from(""),
-        Line::from(Span::styled("Data View", Style::default().fg(t.peach).add_modifier(Modifier::BOLD))),
-        Line::from(vec![Span::styled("  ↑/↓ j/k           ", ks), Span::styled("Move row cursor", ds)]),
-        Line::from(vec![Span::styled("  ←/→ h/l           ", ks), Span::styled("Move column cursor", ds)]),
-        Line::from(vec![Span::styled("  PgUp / PgDn       ", ks), Span::styled("Page up/down", ds)]),
-        Line::from(vec![Span::styled("  g / G             ", ks), Span::styled("First / last row", ds)]),
-        Line::from(vec![Span::styled("  Enter             ", ks), Span::styled("Row detail view", ds)]),
-        Line::from(vec![Span::styled("  s                 ", ks), Span::styled("Sort by column", ds)]),
-        Line::from(vec![Span::styled("  /                 ", ks), Span::styled("Search in data", ds)]),
-        Line::from(vec![Span::styled("  n / N             ", ks), Span::styled("Next/prev search match", ds)]),
-        Line::from(vec![Span::styled("  f                 ", ks), Span::styled("Filter (WHERE clause)", ds)]),
-        Line::from(vec![Span::styled("  y / Y             ", ks), Span::styled("Copy cell / copy row", ds)]),
-        Line::from(vec![Span::styled("  Ctrl+Y            ", ks), Span::styled("Copy column", ds)]),
-        Line::from(vec![Span::styled("  e / E             ", ks), Span::styled("Export CSV / JSON", ds)]),
-        Line::from(vec![Span::styled("  d                 ", ks), Span::styled("Schema / DDL view", ds)]),
-        Line::from(vec![Span::styled("  x                 ", ks), Span::styled("Toggle hex display", ds)]),
-        Line::from(vec![Span::styled("  + / -             ", ks), Span::styled("Widen / narrow column", ds)]),
-        Line::from(vec![Span::styled("  p                 ", ks), Span::styled("Pin/unpin columns", ds)]),
-        Line::from(vec![Span::styled("  i                 ", ks), Span::styled("Edit cell (tables only)", ds)]),
-        Line::from(vec![Span::styled("  D                 ", ks), Span::styled("Delete row (tables only)", ds)]),
-        Line::from(vec![Span::styled("  T                 ", ks), Span::styled("Cycle color theme", ds)]),
+        Line::from(Span::styled(
+            "Data View",
+            Style::default().fg(t.peach).add_modifier(Modifier::BOLD),
+        )),
+        Line::from(vec![
+            Span::styled("  ↑/↓ j/k           ", ks),
+            Span::styled("Move row cursor", ds),
+        ]),
+        Line::from(vec![
+            Span::styled("  ←/→ h/l           ", ks),
+            Span::styled("Move column cursor", ds),
+        ]),
+        Line::from(vec![
+            Span::styled("  PgUp / PgDn       ", ks),
+            Span::styled("Page up/down", ds),
+        ]),
+        Line::from(vec![
+            Span::styled("  g / G             ", ks),
+            Span::styled("First / last row", ds),
+        ]),
+        Line::from(vec![
+            Span::styled("  Enter             ", ks),
+            Span::styled("Row detail view", ds),
+        ]),
+        Line::from(vec![
+            Span::styled("  s                 ", ks),
+            Span::styled("Sort by column", ds),
+        ]),
+        Line::from(vec![
+            Span::styled("  /                 ", ks),
+            Span::styled("Search in data", ds),
+        ]),
+        Line::from(vec![
+            Span::styled("  n / N             ", ks),
+            Span::styled("Next/prev search match", ds),
+        ]),
+        Line::from(vec![
+            Span::styled("  f                 ", ks),
+            Span::styled("Filter (WHERE clause)", ds),
+        ]),
+        Line::from(vec![
+            Span::styled("  y / Y             ", ks),
+            Span::styled("Copy cell / copy row", ds),
+        ]),
+        Line::from(vec![
+            Span::styled("  Ctrl+Y            ", ks),
+            Span::styled("Copy column", ds),
+        ]),
+        Line::from(vec![
+            Span::styled("  e / E             ", ks),
+            Span::styled("Export CSV / JSON", ds),
+        ]),
+        Line::from(vec![
+            Span::styled("  d                 ", ks),
+            Span::styled("Schema / DDL view", ds),
+        ]),
+        Line::from(vec![
+            Span::styled("  x                 ", ks),
+            Span::styled("Toggle hex display", ds),
+        ]),
+        Line::from(vec![
+            Span::styled("  + / -             ", ks),
+            Span::styled("Widen / narrow column", ds),
+        ]),
+        Line::from(vec![
+            Span::styled("  p                 ", ks),
+            Span::styled("Pin/unpin columns", ds),
+        ]),
+        Line::from(vec![
+            Span::styled("  i                 ", ks),
+            Span::styled("Edit cell (tables only)", ds),
+        ]),
+        Line::from(vec![
+            Span::styled("  D                 ", ks),
+            Span::styled("Delete row (tables only)", ds),
+        ]),
+        Line::from(vec![
+            Span::styled("  T                 ", ks),
+            Span::styled("Cycle color theme", ds),
+        ]),
         Line::from(""),
-        Line::from(Span::styled("Query Editor", Style::default().fg(t.peach).add_modifier(Modifier::BOLD))),
-        Line::from(vec![Span::styled("  Enter             ", ks), Span::styled("Execute query", ds)]),
-        Line::from(vec![Span::styled("  Shift+Enter       ", ks), Span::styled("New line", ds)]),
-        Line::from(vec![Span::styled("  ↑ / ↓             ", ks), Span::styled("Query history", ds)]),
-        Line::from(vec![Span::styled("  Tab / Shift+Tab   ", ks), Span::styled("Fuzzy autocomplete", ds)]),
-        Line::from(vec![Span::styled("  Ctrl+Z / Ctrl+Y   ", ks), Span::styled("Undo / redo", ds)]),
-        Line::from(vec![Span::styled("  Ctrl+S            ", ks), Span::styled("Save query", ds)]),
-        Line::from(vec![Span::styled("  Ctrl+O            ", ks), Span::styled("Open saved queries", ds)]),
-        Line::from(vec![Span::styled("  Ctrl+U            ", ks), Span::styled("Clear query", ds)]),
+        Line::from(Span::styled(
+            "Query Editor",
+            Style::default().fg(t.peach).add_modifier(Modifier::BOLD),
+        )),
+        Line::from(vec![
+            Span::styled("  Enter             ", ks),
+            Span::styled("Execute query", ds),
+        ]),
+        Line::from(vec![
+            Span::styled("  Shift+Enter       ", ks),
+            Span::styled("New line", ds),
+        ]),
+        Line::from(vec![
+            Span::styled("  ↑ / ↓             ", ks),
+            Span::styled("Query history", ds),
+        ]),
+        Line::from(vec![
+            Span::styled("  Tab / Shift+Tab   ", ks),
+            Span::styled("Fuzzy autocomplete", ds),
+        ]),
+        Line::from(vec![
+            Span::styled("  Ctrl+Z / Ctrl+Y   ", ks),
+            Span::styled("Undo / redo", ds),
+        ]),
+        Line::from(vec![
+            Span::styled("  Ctrl+S            ", ks),
+            Span::styled("Save query", ds),
+        ]),
+        Line::from(vec![
+            Span::styled("  Ctrl+O            ", ks),
+            Span::styled("Open saved queries", ds),
+        ]),
+        Line::from(vec![
+            Span::styled("  Ctrl+U            ", ks),
+            Span::styled("Clear query", ds),
+        ]),
         Line::from(""),
-        Line::from(Span::styled("Tables", Style::default().fg(t.peach).add_modifier(Modifier::BOLD))),
-        Line::from(vec![Span::styled("  ↑/↓ j/k           ", ks), Span::styled("Navigate tables", ds)]),
-        Line::from(vec![Span::styled("  Enter / l          ", ks), Span::styled("Select table", ds)]),
-        Line::from(vec![Span::styled("  d                 ", ks), Span::styled("Schema / DDL view", ds)]),
-        Line::from(vec![Span::styled("  r                 ", ks), Span::styled("Refresh", ds)]),
-        Line::from(vec![Span::styled("  > / <             ", ks), Span::styled("Resize table pane", ds)]),
+        Line::from(Span::styled(
+            "Tables",
+            Style::default().fg(t.peach).add_modifier(Modifier::BOLD),
+        )),
+        Line::from(vec![
+            Span::styled("  ↑/↓ j/k           ", ks),
+            Span::styled("Navigate tables", ds),
+        ]),
+        Line::from(vec![
+            Span::styled("  Enter / l          ", ks),
+            Span::styled("Select table", ds),
+        ]),
+        Line::from(vec![
+            Span::styled("  d                 ", ks),
+            Span::styled("Schema / DDL view", ds),
+        ]),
+        Line::from(vec![
+            Span::styled("  r                 ", ks),
+            Span::styled("Refresh", ds),
+        ]),
+        Line::from(vec![
+            Span::styled("  > / <             ", ks),
+            Span::styled("Resize table pane", ds),
+        ]),
         Line::from(""),
-        Line::from(Span::styled("General", Style::default().fg(t.peach).add_modifier(Modifier::BOLD))),
-        Line::from(vec![Span::styled("  Tab / Shift+Tab    ", ks), Span::styled("Cycle focus", ds)]),
-        Line::from(vec![Span::styled("  ? / F1            ", ks), Span::styled("Toggle this help", ds)]),
-        Line::from(vec![Span::styled("  q / Ctrl+C        ", ks), Span::styled("Quit", ds)]),
-        Line::from(vec![Span::styled("  Mouse             ", ks), Span::styled("Click & scroll support", ds)]),
+        Line::from(Span::styled(
+            "General",
+            Style::default().fg(t.peach).add_modifier(Modifier::BOLD),
+        )),
+        Line::from(vec![
+            Span::styled("  Tab / Shift+Tab    ", ks),
+            Span::styled("Cycle focus", ds),
+        ]),
+        Line::from(vec![
+            Span::styled("  ? / F1            ", ks),
+            Span::styled("Toggle this help", ds),
+        ]),
+        Line::from(vec![
+            Span::styled("  q / Ctrl+C        ", ks),
+            Span::styled("Quit", ds),
+        ]),
+        Line::from(vec![
+            Span::styled("  Mouse             ", ks),
+            Span::styled("Click & scroll support", ds),
+        ]),
     ];
 
     let total_lines = help_text.len();
@@ -986,8 +1167,12 @@ fn draw_row_detail(f: &mut Frame, app: &App, area: Rect, t: &Theme) {
         return;
     };
 
-    let popup_w = (area.width * 3 / 4).max(40).min(area.width.saturating_sub(4));
-    let popup_h = (area.height * 3 / 4).max(10).min(area.height.saturating_sub(4));
+    let popup_w = (area.width * 3 / 4)
+        .max(40)
+        .min(area.width.saturating_sub(4));
+    let popup_h = (area.height * 3 / 4)
+        .max(10)
+        .min(area.height.saturating_sub(4));
     let x = (area.width.saturating_sub(popup_w)) / 2;
     let y = (area.height.saturating_sub(popup_h)) / 2;
     let popup_area = Rect::new(x, y, popup_w, popup_h);
@@ -1039,9 +1224,7 @@ fn draw_row_detail(f: &mut Frame, app: &App, area: Rect, t: &Theme) {
         lines.push(Line::from(vec![
             Span::styled(
                 col_display,
-                Style::default()
-                    .fg(t.accent)
-                    .add_modifier(Modifier::BOLD),
+                Style::default().fg(t.accent).add_modifier(Modifier::BOLD),
             ),
             Span::styled("  │ ", Style::default().fg(t.surface1)),
             Span::styled(display_val.to_string(), val_style),
@@ -1076,8 +1259,12 @@ fn draw_schema_popup(f: &mut Frame, app: &App, area: Rect, t: &Theme) {
         return;
     };
 
-    let popup_w = (area.width * 3 / 4).max(50).min(area.width.saturating_sub(4));
-    let popup_h = (area.height * 3 / 4).max(12).min(area.height.saturating_sub(4));
+    let popup_w = (area.width * 3 / 4)
+        .max(50)
+        .min(area.width.saturating_sub(4));
+    let popup_h = (area.height * 3 / 4)
+        .max(12)
+        .min(area.height.saturating_sub(4));
     let x = (area.width.saturating_sub(popup_w)) / 2;
     let y = (area.height.saturating_sub(popup_h)) / 2;
     let popup_area = Rect::new(x, y, popup_w, popup_h);
@@ -1115,12 +1302,13 @@ fn draw_schema_popup(f: &mut Frame, app: &App, area: Rect, t: &Theme) {
         lines.push(Line::from(vec![
             Span::styled(
                 pk_marker,
-                Style::default()
-                    .fg(t.yellow)
-                    .add_modifier(Modifier::BOLD),
+                Style::default().fg(t.yellow).add_modifier(Modifier::BOLD),
             ),
             Span::styled(format!(" {:<20}", col.name), Style::default().fg(t.accent)),
-            Span::styled(format!(" {:<15}", col.col_type), Style::default().fg(t.text)),
+            Span::styled(
+                format!(" {:<15}", col.col_type),
+                Style::default().fg(t.text),
+            ),
             Span::styled(nn_marker.to_string(), Style::default().fg(t.red)),
             Span::styled(default, Style::default().fg(t.overlay0)),
         ]));
@@ -1149,7 +1337,10 @@ fn draw_schema_popup(f: &mut Frame, app: &App, area: Rect, t: &Theme) {
         )));
         for fk in &schema.foreign_keys {
             lines.push(Line::from(vec![
-                Span::styled(format!("  {} ", fk.from_column), Style::default().fg(t.accent)),
+                Span::styled(
+                    format!("  {} ", fk.from_column),
+                    Style::default().fg(t.accent),
+                ),
                 Span::styled("→ ", Style::default().fg(t.overlay0)),
                 Span::styled(&fk.to_table, Style::default().fg(t.green)),
                 Span::styled(format!(".{}", fk.to_column), Style::default().fg(t.teal)),
@@ -1163,7 +1354,11 @@ fn draw_schema_popup(f: &mut Frame, app: &App, area: Rect, t: &Theme) {
         .schema_scroll
         .min(total_lines.saturating_sub(visible_inner_h));
 
-    let visible_lines: Vec<Line> = lines.into_iter().skip(scroll).take(visible_inner_h).collect();
+    let visible_lines: Vec<Line> = lines
+        .into_iter()
+        .skip(scroll)
+        .take(visible_inner_h)
+        .collect();
 
     let block = Block::default()
         .title(Span::styled(
@@ -1183,7 +1378,9 @@ fn draw_schema_popup(f: &mut Frame, app: &App, area: Rect, t: &Theme) {
 }
 
 fn draw_saved_queries_popup(f: &mut Frame, app: &App, area: Rect, t: &Theme) {
-    let popup_w = (area.width * 2 / 3).max(40).min(area.width.saturating_sub(4));
+    let popup_w = (area.width * 2 / 3)
+        .max(40)
+        .min(area.width.saturating_sub(4));
     let popup_h = (area.height / 2).max(8).min(area.height.saturating_sub(4));
     let x = (area.width.saturating_sub(popup_w)) / 2;
     let y = (area.height.saturating_sub(popup_h)) / 2;
@@ -1213,15 +1410,16 @@ fn draw_saved_queries_popup(f: &mut Frame, app: &App, area: Rect, t: &Theme) {
         .iter()
         .enumerate()
         .map(|(i, (name, sql))| {
-            let preview: String = sql.chars().take(inner_w.saturating_sub(name.len() + 4)).collect();
+            let preview: String = sql
+                .chars()
+                .take(inner_w.saturating_sub(name.len() + 4))
+                .collect();
             let preview = preview.replace('\n', " ");
             if i == app.saved_query_selected {
                 ListItem::new(Line::from(vec![
                     Span::styled(
                         format!("▸ {name}"),
-                        Style::default()
-                            .fg(t.accent)
-                            .add_modifier(Modifier::BOLD),
+                        Style::default().fg(t.accent).add_modifier(Modifier::BOLD),
                     ),
                     Span::styled(format!("  {preview}"), Style::default().fg(t.subtext0)),
                 ]))

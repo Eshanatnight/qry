@@ -311,8 +311,7 @@ impl App {
             let row_count = result.rows.len();
             let dur = format_duration(self.query_duration.unwrap());
             if executed > 1 {
-                self.status_msg =
-                    format!("{executed} statements, {row_count} rows ({dur})");
+                self.status_msg = format!("{executed} statements, {row_count} rows ({dur})");
             } else {
                 self.status_msg = format!("Query returned {row_count} rows ({dur})");
             }
@@ -1026,7 +1025,8 @@ impl App {
         if let Some(ref data) = self.table_data {
             if let Some(row) = data.rows.get(self.selected_row) {
                 let line = row.join("\t");
-                self.status_msg = format!("Copied row {} ({} cols)", self.selected_row + 1, row.len());
+                self.status_msg =
+                    format!("Copied row {} ({} cols)", self.selected_row + 1, row.len());
                 #[cfg(not(test))]
                 {
                     let _ = copy_to_clipboard(&line);
@@ -1048,8 +1048,7 @@ impl App {
                     .collect();
                 let text = vals.join("\n");
                 let col_name = &data.columns[col];
-                self.status_msg =
-                    format!("Copied column {col_name} ({} values)", vals.len());
+                self.status_msg = format!("Copied column {col_name} ({} values)", vals.len());
                 #[cfg(not(test))]
                 {
                     let _ = copy_to_clipboard(&text);
@@ -1232,9 +1231,17 @@ impl App {
             return;
         }
         let table = self.tables[self.selected_table].clone();
-        let Some(ref data) = self.table_data else { return };
-        let Some(row) = data.rows.get(self.selected_row) else { return };
-        let col_name = data.columns.get(self.selected_col).cloned().unwrap_or_default();
+        let Some(ref data) = self.table_data else {
+            return;
+        };
+        let Some(row) = data.rows.get(self.selected_row) else {
+            return;
+        };
+        let col_name = data
+            .columns
+            .get(self.selected_col)
+            .cloned()
+            .unwrap_or_default();
 
         let escaped_table = table.replace('"', "\"\"");
         let escaped_col = col_name.replace('"', "\"\"");
@@ -1268,7 +1275,12 @@ impl App {
             self.status_msg = "Delete only works on table data".into();
             return;
         }
-        if self.table_data.as_ref().map(|d| d.rows.is_empty()).unwrap_or(true) {
+        if self
+            .table_data
+            .as_ref()
+            .map(|d| d.rows.is_empty())
+            .unwrap_or(true)
+        {
             self.status_msg = "No row to delete".into();
             return;
         }
@@ -1282,8 +1294,12 @@ impl App {
             return;
         }
         let table = self.tables[self.selected_table].clone();
-        let Some(ref data) = self.table_data else { return };
-        let Some(row) = data.rows.get(self.selected_row) else { return };
+        let Some(ref data) = self.table_data else {
+            return;
+        };
+        let Some(row) = data.rows.get(self.selected_row) else {
+            return;
+        };
 
         let escaped_table = table.replace('"', "\"\"");
         let where_clause = build_where_clause(&data.columns, row);
@@ -1295,8 +1311,7 @@ impl App {
                 self.load_selected_table();
             }
             Err(_) => {
-                let sql_no_limit =
-                    format!("DELETE FROM \"{escaped_table}\" WHERE {where_clause}");
+                let sql_no_limit = format!("DELETE FROM \"{escaped_table}\" WHERE {where_clause}");
                 match self.db.execute_query(&sql_no_limit) {
                     Ok(_) => {
                         self.status_msg = "Row deleted".into();
@@ -1465,7 +1480,11 @@ impl App {
 
     pub fn click_at(&mut self, col: u16, row: u16) {
         if let Some(area) = self.table_list_area {
-            if col >= area.x && col < area.x + area.width && row >= area.y && row < area.y + area.height {
+            if col >= area.x
+                && col < area.x + area.width
+                && row >= area.y
+                && row < area.y + area.height
+            {
                 let inner_row = (row - area.y).saturating_sub(1) as usize;
                 if inner_row < self.tables.len() {
                     self.selected_table = inner_row;
@@ -1476,7 +1495,11 @@ impl App {
             }
         }
         if let Some(area) = self.data_view_area {
-            if col >= area.x && col < area.x + area.width && row >= area.y && row < area.y + area.height {
+            if col >= area.x
+                && col < area.x + area.width
+                && row >= area.y
+                && row < area.y + area.height
+            {
                 let inner_row = (row - area.y).saturating_sub(2) as usize;
                 let abs_row = self.data_scroll_row + inner_row;
                 if let Some(ref data) = self.table_data {
@@ -1489,7 +1512,11 @@ impl App {
             }
         }
         if let Some(area) = self.query_editor_area {
-            if col >= area.x && col < area.x + area.width && row >= area.y && row < area.y + area.height {
+            if col >= area.x
+                && col < area.x + area.width
+                && row >= area.y
+                && row < area.y + area.height
+            {
                 self.focus = Focus::QueryEditor;
                 return;
             }
@@ -1498,7 +1525,11 @@ impl App {
 
     pub fn scroll_at(&mut self, col: u16, row: u16, down: bool) {
         if let Some(area) = self.table_list_area {
-            if col >= area.x && col < area.x + area.width && row >= area.y && row < area.y + area.height {
+            if col >= area.x
+                && col < area.x + area.width
+                && row >= area.y
+                && row < area.y + area.height
+            {
                 if down {
                     self.select_table_down();
                 } else {
@@ -1508,7 +1539,11 @@ impl App {
             }
         }
         if let Some(area) = self.data_view_area {
-            if col >= area.x && col < area.x + area.width && row >= area.y && row < area.y + area.height {
+            if col >= area.x
+                && col < area.x + area.width
+                && row >= area.y
+                && row < area.y + area.height
+            {
                 if down {
                     self.scroll_data_down();
                     self.scroll_data_down();
@@ -1698,6 +1733,6 @@ const SQL_KEYWORDS: &[&str] = &[
     "CREATE", "CROSS", "DELETE", "DESC", "DISTINCT", "DROP", "ELSE", "END", "EXISTS", "EXPLAIN",
     "FALSE", "FROM", "FULL", "GROUP", "HAVING", "IF", "IN", "INDEX", "INNER", "INSERT", "INTO",
     "IS", "JOIN", "LEFT", "LIKE", "LIMIT", "MAX", "MIN", "NOT", "NULL", "OFFSET", "ON", "OR",
-    "ORDER", "OUTER", "PRIMARY", "RIGHT", "SELECT", "SET", "SUM", "TABLE", "THEN", "TRUE",
-    "UNION", "UPDATE", "USING", "VALUES", "WHEN", "WHERE", "WITH",
+    "ORDER", "OUTER", "PRIMARY", "RIGHT", "SELECT", "SET", "SUM", "TABLE", "THEN", "TRUE", "UNION",
+    "UPDATE", "USING", "VALUES", "WHEN", "WHERE", "WITH",
 ];
